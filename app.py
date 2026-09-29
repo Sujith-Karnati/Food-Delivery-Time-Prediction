@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import joblib
 
-
 # ============================================================
 # PAGE CONFIGURATION
 # ============================================================
@@ -13,6 +12,19 @@ st.set_page_config(
     layout="wide"
 )
 
+# ============================================================
+# SIMPLE NATIVE STREAMLIT STYLE
+# No custom HTML/CSS - reliable and easy to run
+# ============================================================
+
+st.title("🍔 Food Delivery Time Predictor")
+
+st.caption(
+    "Predict estimated food delivery time using order, "
+    "traffic, weather, distance and rider information."
+)
+
+st.divider()
 
 # ============================================================
 # LOAD MODEL
@@ -25,6 +37,7 @@ def load_model():
 
 try:
     model = load_model()
+
 except Exception as e:
     st.error("❌ Could not load model.pkl")
     st.code(str(e))
@@ -32,91 +45,43 @@ except Exception as e:
 
 
 # ============================================================
-# TITLE
+# SIDEBAR
 # ============================================================
 
-st.title("🍔 Food Delivery Time Prediction")
-st.write(
-    "Enter the order details below to predict the estimated delivery time."
-)
+with st.sidebar:
 
-st.divider()
+    st.header("⚙️ Prediction Settings")
 
+    st.info(
+        "Enter the delivery details and click "
+        "'Predict Delivery Time'."
+    )
 
-# ============================================================
-# HELPER FUNCTION
-# ============================================================
+    st.divider()
 
-def get_category_options(column_name):
-    """
-    Try to extract the actual categories used during model training
-    from OneHotEncoder inside the trained pipeline.
-    """
-
-    try:
-        # Check pipeline steps
-        if hasattr(model, "named_steps"):
-
-            for step_name, step in model.named_steps.items():
-
-                # ColumnTransformer
-                if hasattr(step, "transformers_"):
-
-                    for _, transformer, columns in step.transformers_:
-
-                        if transformer == "drop" or transformer == "passthrough":
-                            continue
-
-                        # Convert columns to list
-                        if isinstance(columns, str):
-                            columns = [columns]
-
-                        if hasattr(transformer, "categories_"):
-
-                            for col, categories in zip(
-                                columns,
-                                transformer.categories_
-                            ):
-
-                                if col == column_name:
-                                    return list(categories)
-
-    except Exception:
-        pass
-
-    return None
+    st.caption("Food Delivery Time Prediction")
+    st.caption("Machine Learning Project")
 
 
 # ============================================================
-# INPUT SECTION
+# ORDER INFORMATION
 # ============================================================
 
-st.header("📦 Order Information")
+st.subheader("📦 Order Information")
 
 col1, col2, col3 = st.columns(3)
 
-
-# ------------------------------------------------------------
-# Order Hour
-# ------------------------------------------------------------
-
 with col1:
-
     order_hour = st.number_input(
         "Order Hour",
         min_value=0,
         max_value=23,
         value=13,
-        step=1
+        step=1,
+        key="order_hour"
     )
 
-
-# ------------------------------------------------------------
-# Day of Week
-# ------------------------------------------------------------
-
 with col2:
-
     day_of_week = st.selectbox(
         "Day of Week",
         [
@@ -127,51 +92,38 @@ with col2:
             "Friday",
             "Saturday",
             "Sunday"
-        ]
+        ],
+        key="day_of_week"
     )
 
-
-# ------------------------------------------------------------
-# Is Weekend
-# ------------------------------------------------------------
-
 with col3:
-
     is_weekend = st.selectbox(
         "Is Weekend",
         [0, 1],
-        format_func=lambda x: "Yes" if x == 1 else "No"
+        format_func=lambda x: "Yes" if x == 1 else "No",
+        key="is_weekend"
     )
 
 
 # ============================================================
-# FESTIVAL / WEATHER
+# WEATHER AND TRAFFIC
 # ============================================================
 
-st.header("🌦️ Date & Weather")
+st.divider()
+
+st.subheader("🌦️ Weather & Traffic")
 
 col1, col2, col3 = st.columns(3)
 
-
-# ------------------------------------------------------------
-# Is Festival
-# ------------------------------------------------------------
-
 with col1:
-
     is_festival = st.selectbox(
         "Is Festival",
         [0, 1],
-        format_func=lambda x: "Yes" if x == 1 else "No"
+        format_func=lambda x: "Yes" if x == 1 else "No",
+        key="is_festival"
     )
 
-
-# ------------------------------------------------------------
-# Weather
-# ------------------------------------------------------------
-
 with col2:
-
     weather = st.selectbox(
         "Weather",
         [
@@ -180,40 +132,32 @@ with col2:
             "Cloudy",
             "Storm",
             "Fog"
-        ]
+        ],
+        key="weather"
     )
 
-
-# ------------------------------------------------------------
-# Traffic Level
-# ------------------------------------------------------------
-
 with col3:
-
     traffic_level = st.selectbox(
-            "Traffic Level",
-            [
-                'Low',
-                'Moderate',
-                'High',
-                'Severe'
-            ]
-        )
-
-
+        "Traffic Level",
+        [
+            "Low",
+            "Moderate",
+            "High",
+            "Severe"
+        ],
+        key="traffic_level"
+    )
 
 
 # ============================================================
 # LOCATION
 # ============================================================
 
-st.header("📍 Location Information")
+st.divider()
+
+st.subheader("📍 Location Information")
 
 col1, col2, col3 = st.columns(3)
-
-# ------------------------------------------------------------
-# Pickup Zone
-# ------------------------------------------------------------
 
 with col1:
     pickup_zone = st.selectbox(
@@ -224,7 +168,8 @@ with col1:
             "Commercial",
             "Industrial",
             "Suburban"
-        ]
+        ],
+        key="pickup_zone"
     )
 
 with col2:
@@ -236,22 +181,19 @@ with col2:
             "CBD",
             "Suburban",
             "Industrial"
-        ]
+        ],
+        key="dropoff_zone"
     )
 
-# ------------------------------------------------------------
-# Delivery Distance Category
-# ------------------------------------------------------------
-
 with col3:
-
     delivery_distance_category = st.selectbox(
         "Delivery Distance Category",
         [
             "Short",
             "Medium",
             "Long"
-        ]
+        ],
+        key="delivery_distance_category"
     )
 
 
@@ -259,7 +201,9 @@ with col3:
 # RESTAURANT INFORMATION
 # ============================================================
 
-st.header("🍽️ Restaurant Information")
+st.divider()
+
+st.subheader("🍽️ Restaurant Information")
 
 col1, col2, col3 = st.columns(3)
 
@@ -276,7 +220,8 @@ with col1:
             "Cafe",
             "Bakery",
             "Desserts"
-        ]
+        ],
+        key="cuisine_type"
     )
 
 with col2:
@@ -286,7 +231,8 @@ with col2:
             "Low",
             "Medium",
             "High"
-        ]
+        ],
+        key="restaurant_load"
     )
 
 with col3:
@@ -295,13 +241,18 @@ with col3:
         min_value=1,
         max_value=20,
         value=2,
-        step=1
+        step=1,
+        key="order_items"
     )
+
+
 # ============================================================
 # RIDER INFORMATION
 # ============================================================
 
-st.header("🛵 Rider Information")
+st.divider()
+
+st.subheader("🛵 Rider Information")
 
 col1, col2, col3 = st.columns(3)
 
@@ -313,7 +264,8 @@ with col1:
             "Scooter",
             "Electric Scooter",
             "Bicycle"
-        ]
+        ],
+        key="vehicle_type"
     )
 
 with col2:
@@ -322,7 +274,8 @@ with col2:
         min_value=0.0,
         max_value=30.0,
         value=2.0,
-        step=0.5
+        step=0.5,
+        key="rider_experience"
     )
 
 with col3:
@@ -331,100 +284,81 @@ with col3:
         min_value=0.0,
         max_value=5.0,
         value=4.5,
-        step=0.1
+        step=0.1,
+        key="rider_rating"
     )
 
+
 # ============================================================
-# RATINGS & PREPARATION
+# RATINGS AND PREPARATION
 # ============================================================
 
-st.header("⭐ Ratings & Preparation")
+st.divider()
+
+st.subheader("⭐ Ratings & Preparation")
 
 col1, col2, col3 = st.columns(3)
 
-
-# ------------------------------------------------------------
-# Restaurant Rating
-# ------------------------------------------------------------
-
 with col1:
-
     restaurant_rating = st.number_input(
         "Restaurant Rating",
         min_value=0.0,
         max_value=5.0,
         value=4.0,
-        step=0.1
+        step=0.1,
+        key="restaurant_rating"
     )
 
-
-# ------------------------------------------------------------
-# Preparation Time
-# ------------------------------------------------------------
-
 with col2:
-
     preparation_time = st.number_input(
         "Preparation Time (Minutes)",
         min_value=0.0,
         max_value=180.0,
         value=20.0,
-        step=1.0
+        step=1.0,
+        key="preparation_time"
     )
 
-
-# ------------------------------------------------------------
-# Number of Signals
-# ------------------------------------------------------------
-
 with col3:
-
     number_of_signals = st.number_input(
         "Number of Signals",
         min_value=0,
         max_value=100,
         value=5,
-        step=1
+        step=1,
+        key="number_of_signals"
     )
 
 
 # ============================================================
-# DISTANCE
+# DELIVERY DISTANCE
 # ============================================================
 
-st.header("🛣️ Delivery Distance")
+st.divider()
+
+st.subheader("🛣️ Delivery Distance")
 
 col1, col2 = st.columns(2)
 
-
-# ------------------------------------------------------------
-# Road Distance
-# ------------------------------------------------------------
-
 with col1:
-
     road_distance = st.number_input(
         "Road Distance (km)",
         min_value=0.1,
         max_value=100.0,
         value=5.0,
-        step=0.1
+        step=0.1,
+        key="road_distance"
     )
 
-
-# ------------------------------------------------------------
-# Delivery Priority
-# ------------------------------------------------------------
-
 with col2:
-
     delivery_priority = st.selectbox(
         "Delivery Priority",
         [
             "Normal",
             "Priority",
             "VIP"
-        ]
+        ],
+        key="delivery_priority"
     )
 
 
@@ -434,10 +368,13 @@ with col2:
 
 st.divider()
 
+st.subheader("🚀 Get Prediction")
+
 predict_button = st.button(
     "🚀 Predict Delivery Time",
     type="primary",
-    use_container_width=True
+    use_container_width=True,
+    key="predict_delivery_time"
 )
 
 
@@ -447,71 +384,30 @@ predict_button = st.button(
 
 if predict_button:
 
-    # --------------------------------------------------------
-    # CREATE INPUT DATAFRAME
-    # --------------------------------------------------------
-
     input_data = pd.DataFrame({
-
         "Order_Hour": [order_hour],
-
         "Day_of_Week": [day_of_week],
-
         "Is_Weekend": [is_weekend],
-
         "Is_Festival": [is_festival],
-
         "Weather": [weather],
-
         "Pickup_Zone": [pickup_zone],
-
         "Dropoff_Zone": [dropoff_zone],
-
         "Vehicle_Type": [vehicle_type],
-
         "Rider_Experience_Years": [rider_experience],
-
         "Rider_Rating": [rider_rating],
-
         "Restaurant_Rating": [restaurant_rating],
-
         "Cuisine_Type": [cuisine_type],
-
         "Order_Items": [order_items],
-
         "Restaurant_Load": [restaurant_load],
-
         "Preparation_Time_Min": [preparation_time],
-
         "Road_Distance_km": [road_distance],
-
         "Delivery_Distance_Category": [
             delivery_distance_category
         ],
-
         "Traffic_Level": [traffic_level],
-
         "Number_of_Signals": [number_of_signals],
-
         "Delivery_Priority": [delivery_priority]
     })
-
-
-    # --------------------------------------------------------
-    # SHOW INPUT DATA
-    # --------------------------------------------------------
-
-    with st.expander("🔍 View Input Data"):
-
-        st.dataframe(
-            input_data,
-            use_container_width=True
-        )
-
-
-    # --------------------------------------------------------
-    # CHECK REQUIRED COLUMNS
-    # --------------------------------------------------------
 
     try:
 
@@ -519,30 +415,64 @@ if predict_button:
 
         predicted_time = float(prediction[0])
 
+        st.success("✅ Prediction completed successfully!")
 
         # ----------------------------------------------------
         # RESULT
         # ----------------------------------------------------
 
-        st.success("✅ Prediction completed successfully!")
-
         col1, col2, col3 = st.columns(3)
 
         with col1:
-
             st.metric(
-                "Estimated Delivery Time",
-                f"{int(round(predicted_time))} minutes"
+                "⏱️ Estimated Delivery Time",
+                f"{int(round(predicted_time))} min"
             )
-
 
         with col2:
-
             st.metric(
-                "Approximately",
-                f"{predicted_time / 60:.2f} hours"
+                "🕐 Approximately",
+                f"{predicted_time / 60:.2f} hrs"
             )
 
+        with col3:
+            st.metric(
+                "📍 Road Distance",
+                f"{road_distance:.1f} km"
+            )
+
+        st.divider()
+
+        st.subheader("📊 Prediction Summary")
+
+        summary_col1, summary_col2 = st.columns(2)
+
+        with summary_col1:
+
+            st.write("**Traffic Level:**", traffic_level)
+            st.write("**Weather:**", weather)
+            st.write("**Distance Category:**", delivery_distance_category)
+            st.write("**Vehicle:**", vehicle_type)
+            st.write("**Delivery Priority:**", delivery_priority)
+
+        with summary_col2:
+
+            st.write("**Pickup Zone:**", pickup_zone)
+            st.write("**Dropoff Zone:**", dropoff_zone)
+            st.write("**Restaurant Load:**", restaurant_load)
+            st.write("**Preparation Time:**", f"{preparation_time:.0f} min")
+            st.write("**Rider Rating:**", f"{rider_rating:.1f} / 5")
+
+        # ----------------------------------------------------
+        # INPUT DATA
+        # ----------------------------------------------------
+
+        with st.expander("🔍 View Complete Input Data"):
+
+            st.dataframe(
+                input_data,
+                use_container_width=True
+            )
 
     except Exception as e:
 
@@ -560,5 +490,5 @@ if predict_button:
 st.divider()
 
 st.caption(
-    "🍔 Food Delivery Time Prediction | Machine Learning Project"
+    "🍔 Food Delivery Time Prediction"
 )
