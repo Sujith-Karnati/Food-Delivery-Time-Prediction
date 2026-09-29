@@ -1,164 +1,492 @@
-ni# Food Delivery Time Prediction
+# 🚚 Food Delivery Time Prediction
 
-## 📌 Project Overview
+> **An end-to-end Machine Learning project for predicting food delivery time using delivery, traffic, weather, distance, and order-related information.**
 
-This project focuses on predicting food delivery time using Machine Learning regression techniques.
+![Python](https://img.shields.io/badge/Python-3.x-blue?logo=python)
+![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-ML-orange?logo=scikit-learn)
+![XGBoost](https://img.shields.io/badge/XGBoost-Regression-red)
+![Streamlit](https://img.shields.io/badge/Streamlit-Deployment-ff4b4b?logo=streamlit)
+![Git](https://img.shields.io/badge/Git-Version%20Control-orange?logo=git)
+![GitHub](https://img.shields.io/badge/GitHub-Repository-black?logo=github)
 
-The target variable is `Time_taken_min`, which represents the delivery time in minutes.
+---
 
-The project explores how factors such as road distance, average speed, preparation time, traffic level, weather, and other order-related features influence food delivery time.
+## 📌 About the Project
 
-## 🎯 Problem Statement
+Food delivery time depends on several factors such as:
 
-Build a Machine Learning regression model that predicts the time required to deliver a food order based on order, restaurant, rider, traffic, weather, and distance-related features.
+* 📍 Distance between restaurant and customer
+* 🚦 Traffic conditions
+* 🌦️ Weather conditions
+* 🛵 Delivery-related information
+* 🍔 Order characteristics
+* 📌 Location/zone-related factors
 
-## 📊 Dataset Features
+The goal of this project is to build a Machine Learning model that can estimate the expected delivery time for a given order.
 
-The dataset contains features such as:
+### 🎯 Objective
 
-* Order Hour
-* Day of Week
-* Weekend indicator
-* Festival indicator
-* Weather
-* Pickup Zone
-* Dropoff Zone
-* Vehicle Type
-* Rider Experience
-* Rider Rating
-* Restaurant Rating
-* Cuisine Type
-* Number of Items
-* Restaurant Load
-* Preparation Time
-* Road Distance
-* Traffic Level
-* Number of Signals
-* Average Speed
-* Delivery Priority
+> **Build an accurate and reliable regression model that predicts `Time_taken_min` while avoiding data leakage and deploy the final model through a user-friendly Streamlit application.**
 
-### Target Variable
+---
 
-`Time_taken_min`
+# 🧭 Project Workflow
 
-## 🔎 Exploratory Data Analysis
+```text
+                    ┌─────────────────┐
+                    │   Raw Dataset   │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │  Data Cleaning  │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │       EDA       │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │Feature Engineering│
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │ Preprocessing   │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │ Train/Test Split│
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │ Model Training  │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │ Model Evaluation│
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │ Hyperparameter  │
+                    │     Tuning      │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │  Final Model    │
+                    └────────┬────────┘
+                             ↓
+                    ┌─────────────────┐
+                    │   Streamlit     │
+                    │   Deployment    │
+                    └─────────────────┘
+```
 
-The following EDA steps were performed:
+---
 
-* Checked missing values
-* Checked duplicate records
-* Investigated numerical feature distributions
-* Investigated potential outliers using boxplots and IQR
-* Analyzed numerical features against the target using scatterplots
-* Analyzed categorical features against the target using boxplots
-* Examined correlations between numerical variables
+# 🛠️ Tech Stack
 
-### Key EDA Findings
-
-* `Road_Distance_km` has a strong positive relationship with delivery time.
-* `Average_Speed_kmph` has a strong negative relationship with delivery time.
-* `Preparation_Time_Min` has a weaker positive relationship with delivery time.
-* Higher traffic levels are associated with higher delivery times.
-* Rain and Storm conditions generally have higher delivery times than Clear and Cloudy conditions.
-* `Restaurant_Load` shows a relatively weak individual relationship with delivery time.
-* `Delivery_Priority` shows a relatively weak individual relationship with delivery time.
-* `Time_taken_min` has a maximum recorded value of 180 minutes, with many observations at 180 minutes. These values were retained as valid target observations.
-
-## 🛠️ Data Preprocessing
-
-The following preprocessing steps were performed:
-
-1. Removed irrelevant columns such as `Order_ID` and raw `Order_Date`.
-2. Separated features (`X`) and target (`y`).
-3. Split the data into training and testing sets.
-4. Identified numerical and categorical features.
-5. Applied `StandardScaler` to numerical features.
-6. Applied `OneHotEncoder` to categorical features.
-7. Combined the scaled numerical and encoded categorical features.
-
-### Processed Data Shape
-
-* Training samples: 40,000
-* Testing samples: 10,000
-* Numerical features after selection: 11
-* One-hot encoded categorical features: 48
-* Final features: 59
-
-## 🤖 Machine Learning Model
-
-### K-Nearest Neighbors Regression
-
-`KNeighborsRegressor` was used because the target variable is continuous.
-
-The initial model was trained with:
-
-`k = 5`
-
-### Initial Results
-
-| Metric   |         Score |
-| -------- | ------------: |
-| MAE      | 10.41 minutes |
-| RMSE     | 13.93 minutes |
-| R² Score |        0.8472 |
-
-## 🔧 K Value Experiment
-
-Different values of K were tested:
-
-|  K |   MAE |  RMSE |    R² |
-| -: | ----: | ----: | ----: |
-|  1 | 14.78 | 20.21 | 0.678 |
-|  3 | 11.22 | 15.25 | 0.817 |
-|  5 | 10.41 | 13.93 | 0.847 |
-|  7 | 10.12 | 13.51 | 0.856 |
-|  9 | 10.02 | 13.36 | 0.859 |
-| 11 |  9.98 | 13.29 | 0.861 |
-| 15 |  9.95 | 13.30 | 0.861 |
-| 20 |  9.99 | 13.36 | 0.859 |
-| 25 | 10.04 | 13.46 | 0.857 |
-| 30 | 10.11 | 13.56 | 0.855 |
-
-The results show that model performance improves substantially as K increases from 1 to around 11–15, after which performance starts to decline.
-
-Cross-validation will be used to select the final K without using the test set for model selection.
-
-## 📈 Evaluation Metrics
-
-The model is evaluated using:
-
-* **MAE** — average absolute prediction error in minutes
-* **RMSE** — penalizes larger prediction errors
-* **R² Score** — proportion of variance explained by the model
-
-## 🚀 Future Improvements
-
-* Perform KNN hyperparameter tuning using cross-validation.
-* Compare KNN with Linear Regression.
-* Compare with Ridge and Lasso Regression.
-* Try Decision Tree and Random Forest Regression.
-* Perform feature selection.
-* Analyze prediction errors.
-* Build a deployment interface for delivery-time prediction.
-
-## 🧰 Technologies Used
+### 💻 Programming Language
 
 * Python
-* Pandas
+
+### 📚 Libraries & Frameworks
+
 * NumPy
+* Pandas
 * Matplotlib
 * Seaborn
 * Scikit-learn
+* XGBoost
+* Streamlit
+
+### 🔧 Development Tools
+
 * Jupyter Notebook
+* VS Code
 * Git
 * GitHub
 
-## 👨‍💻 Project Status
+---
 
-**In Progress**
+# 📊 Exploratory Data Analysis
 
-Current stage:
+The dataset was analyzed to understand the relationship between different features and delivery time.
 
-`EDA → Feature Preprocessing → KNN Regression → Hyperparameter Tuning`
+### 🔍 Key Areas Explored
 
-Future work will focus on cross-validation and comparison with other regression algorithms.
+| Analysis Area                     | Purpose                        |
+| --------------------------------- | ------------------------------ |
+| Distribution of delivery time     | Understand target distribution |
+| Distance vs delivery time         | Analyze distance impact        |
+| Traffic vs delivery time          | Understand traffic impact      |
+| Weather vs delivery time          | Analyze weather effects        |
+| Weekend vs weekday patterns       | Compare delivery patterns      |
+| Categorical feature distributions | Understand category frequency  |
+| Numerical correlations            | Identify relationships         |
+| Outlier analysis                  | Detect unusual observations    |
+
+### 💡 Example Business Insights
+
+* Higher traffic conditions generally correspond to longer delivery times.
+* Weather conditions can affect delivery duration.
+* Delivery distance has an important relationship with delivery time.
+* Delivery patterns can vary between weekdays and weekends.
+
+---
+
+# 🧹 Data Preprocessing
+
+The following preprocessing techniques were applied where required:
+
+* Handling missing values
+* Removing duplicate records
+* Numerical feature preprocessing
+* Categorical feature encoding
+* Feature scaling
+* Train-test splitting
+* Feature selection
+
+A preprocessing pipeline was created using Scikit-learn tools such as:
+
+```python
+ColumnTransformer
+OneHotEncoder
+SimpleImputer
+StandardScaler
+SelectPercentile
+```
+
+---
+
+# ⚠️ Data Leakage Prevention
+
+## 🚨 Identifying Target Leakage
+
+One of the most important findings in this project was **target leakage**.
+
+The dataset contained the feature:
+
+```text
+Average_Speed_kmph
+```
+
+which was calculated using:
+
+```text
+Average_Speed_kmph = Road_Distance_km / Time_taken_min
+```
+
+Since `Time_taken_min` is the target variable, this feature indirectly contained the answer that the model was supposed to predict.
+
+Including this feature would produce artificially high model performance and would not represent a realistic prediction scenario.
+
+### ❌ Leaky Feature
+
+```python
+Average_Speed_kmph
+```
+
+### ✅ Solution
+
+The feature was removed before model training:
+
+```python
+X = df.drop(columns=[
+    "Time_taken_min",
+    "Average_Speed_kmph"
+])
+
+y = df["Time_taken_min"]
+```
+
+The models were then trained and evaluated again without the leaked feature.
+
+### 🎯 Why This Matters
+
+This ensures that the final model uses only information that would realistically be available **before the delivery is completed**.
+
+---
+
+# 🤖 Machine Learning Models
+
+Multiple regression algorithms were experimented with and compared.
+
+### Models Used
+
+* Linear Regression
+* KNN Regression
+* Decision Tree
+* Support Vector Machine
+* Random Forest Regressor
+* AdaBoost Regressor
+* Extra Trees Regressor
+* Gradient Boosting
+* XGBoost Regressor
+
+The models were evaluated using standard regression metrics.
+
+---
+
+# 📏 Model Evaluation
+
+The following metrics were used to evaluate the regression models.
+
+## 1️⃣ MAE — Mean Absolute Error
+
+Measures the average absolute difference between actual and predicted delivery time.
+
+```text
+MAE = average(|Actual - Predicted|)
+```
+
+**Lower MAE is better.**
+
+---
+
+## 2️⃣ MSE — Mean Squared Error
+
+Penalizes larger prediction errors more heavily.
+
+```text
+MSE = average((Actual - Predicted)²)
+```
+
+**Lower MSE is better.**
+
+---
+
+## 3️⃣ RMSE — Root Mean Squared Error
+
+The square root of MSE and expressed in the same unit as the target.
+
+```text
+RMSE = √MSE
+```
+
+**Lower RMSE is better.**
+
+---
+
+## 4️⃣ R² Score
+
+Measures how much variance in delivery time is explained by the model.
+
+```text
+R² = 1 - (SS_res / SS_total)
+```
+
+A higher R² generally indicates better fit.
+
+---
+
+# 🔧 Hyperparameter Tuning
+
+Hyperparameter optimization was performed to improve model performance.
+
+### Techniques Explored
+
+* `GridSearchCV`
+* `RandomizedSearchCV`
+
+These methods were used to search for better combinations of model hyperparameters while evaluating model performance systematically.
+
+---
+
+# 🌐 Streamlit Deployment
+
+The final Machine Learning model was deployed using **Streamlit**.
+
+The application provides an interactive interface where users can enter the required delivery information and receive a predicted delivery time.
+
+### 🔄 Application Flow
+
+```text
+User Input
+    ↓
+Input Validation
+    ↓
+Preprocessing Pipeline
+    ↓
+Trained ML Model
+    ↓
+Predicted Delivery Time
+```
+
+### 📌 Example Output
+
+```text
+Predicted Delivery Time:
+32.5 minutes
+```
+
+The deployed application makes the ML model accessible without requiring users to interact directly with the training notebook.
+
+---
+
+# 📁 Project Structure
+
+```text
+Food-Delivery-Time-Prediction/
+│
+├── data/
+│   └── dataset.csv
+│
+├── notebooks/
+│   ├── EDA.ipynb
+│   ├── Model_Building.ipynb
+│   └── Model_Evaluation.ipynb
+│
+├── models/
+│   └── final_model.pkl
+│
+├── app.py
+│
+├── requirements.txt
+│
+├── README.md
+│
+└── .gitignore
+```
+
+> **Note:** Adjust the folder/file names above to match your actual GitHub repository structure.
+
+---
+
+# 🚀 Run the Project Locally
+
+Follow the steps below to run the project on your local machine.
+
+## 1. Clone the Repository
+
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+```
+
+## 2. Navigate to the Project
+
+```bash
+cd Food-Delivery-Time-Prediction
+```
+
+## 3. Create a Virtual Environment
+
+```bash
+python -m venv venv
+```
+
+### Windows
+
+```bash
+venv\Scripts\activate
+```
+
+### macOS / Linux
+
+```bash
+source venv/bin/activate
+```
+
+## 4. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+## 5. Run the Streamlit Application
+
+```bash
+streamlit run app.py
+```
+
+The application will open in your browser.
+
+---
+
+# 🌍 Live Application
+
+### 🚀 Streamlit App
+
+## **Live Application:**
+
+# 💡 Key Learnings
+
+Through this project, I gained practical experience in:
+
+* End-to-end Machine Learning workflow
+* Regression problems
+* Exploratory Data Analysis
+* Feature engineering
+* Numerical and categorical preprocessing
+* Scikit-learn pipelines
+* Model comparison
+* Regression evaluation metrics
+* Hyperparameter tuning
+* Data leakage detection
+* Preventing target leakage
+* Model serialization
+* Streamlit application development
+* ML model deployment
+* Git and GitHub project management
+
+---
+
+# ⚠️ Important Project Lesson
+
+A major lesson from this project was that:
+
+> **High model performance does not always mean a good Machine Learning model.**
+
+During the project, `Average_Speed_kmph` produced target leakage because it was calculated using the target variable `Time_taken_min`.
+
+After identifying the issue, the feature was removed and the model was retrained.
+
+This reinforced an important ML principle:
+
+> **Features used for prediction must be available at prediction time and must not contain information derived from the target.**
+
+---
+
+# 🔮 Future Improvements
+
+Possible future improvements include:
+
+* Collecting more real-world delivery data
+* Improving feature engineering
+* Adding real-time traffic information
+* Adding live weather information
+* Experimenting with advanced ensemble models
+* Model monitoring after deployment
+* Tracking prediction errors
+* Adding an API layer for production use
+* Containerizing the application using Docker
+
+---
+
+# 👨‍💻 Author
+
+## Sujith Karnati 
+
+**Machine Learning | Data Analytics | Python | AI/ML**
+
+---
+
+# ⭐ Support the Project
+
+If this project helped you understand Machine Learning workflows, feel free to ⭐ the repository.
+
+---
+
+### 📌 Project Highlights
+
+```text
+🚚 Food Delivery Prediction
+        │
+        ├── 📊 EDA
+        ├── 🧹 Data Preprocessing
+        ├── ⚙️ Feature Engineering
+        ├── 🤖 Multiple ML Models
+        ├── 📏 Model Evaluation
+        ├── 🔧 Hyperparameter Tuning
+        ├── ⚠️ Leakage Prevention
+        ├── 💾 Model Serialization
+        └── 🌐 Streamlit Deployment
+```
